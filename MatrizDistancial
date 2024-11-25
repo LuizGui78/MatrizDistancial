@@ -1,0 +1,59 @@
+import numpy as np
+import pandas as pd
+import math
+import random
+from itertools import permutations
+
+def criar_matriz_distancia(total_cidades):
+    matriz_distancia = np.zeros((total_cidades, total_cidades), dtype=np.int16)
+    for origem in range(total_cidades):
+        for destino in range(origem + 1, total_cidades):
+            distancia = random.randint(10, 100)
+            matriz_distancia[origem, destino] = distancia
+            matriz_distancia[destino, origem] = distancia
+    return matriz_distancia
+
+def calcular_custo_construcao(total_cidades):
+    return (total_cidades * (total_cidades - 1)) // 2
+
+def calcular_custo_permutacoes(total_cidades):
+    return math.factorial(total_cidades - 1)
+
+def custo_viagem(matriz_distancia, percurso):
+    custo_total = 0
+    for indice in range(len(percurso) - 1):
+        custo_total += matriz_distancia[percurso[indice] - 1, percurso[indice + 1] - 1]
+    return custo_total
+
+def encontrar_percurso_ideal(matriz_distancia, total_cidades):
+    locais = list(range(1, total_cidades + 1))
+    percurso_ideal = None
+    menor_custo = float('inf')
+
+    for permutacao in permutations(locais):
+        percurso = list(permutacao) + [permutacao[0]]
+        custo_total = custo_viagem(matriz_distancia, percurso)
+        if custo_total < menor_custo:
+            menor_custo = custo_total
+            percurso_ideal = percurso
+
+    return percurso_ideal, menor_custo
+
+def encontrar_percurso_simples(matriz_distancia, total_cidades):
+    percurso = list(range(1, total_cidades + 1)) + [1]
+    custo_total = custo_viagem(matriz_distancia, percurso)
+    return percurso, custo_total
+
+quantidade_cidades = 5
+matriz_distancia = criar_matriz_distancia(quantidade_cidades)
+
+print(f'** Matriz de Distância ({quantidade_cidades}x{quantidade_cidades}) **')
+print(pd.DataFrame(matriz_distancia))
+
+percurso_simples, custo_simples = encontrar_percurso_simples(matriz_distancia, quantidade_cidades)
+print(f'\nPercurso Simples (Sequencial): {percurso_simples}')
+print(f'Custo Total do Percurso Simples: {custo_simples}')
+
+percurso_ideal, menor_custo = encontrar_percurso_ideal(matriz_distancia, quantidade_cidades)
+print(f'\nPercurso Ideal (Ótimo): {percurso_ideal}')
+print(f'Custo Total do Percurso Ideal: {menor_custo}')
